@@ -1,7 +1,3 @@
-# Terraform, simple django app for terraform lennons
+# django app for terraform project
 
-- django
-- sqlite
-- docker
-
-  
+sqlite version
