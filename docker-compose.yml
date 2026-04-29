@@ -2,12 +2,14 @@ services:
   web:
     build: ./web
     container_name: application
+    restart: always
     volumes:
       - ./web/app:/app
       - ./web/app/staticfiles:/app/staticfiles
   nginx:
     image: nginx:latest
     container_name: web-server
+    restart: always
     ports:
       - "80:80"
     volumes:
@@ -15,4 +17,3 @@ services:
       - ./web/app/staticfiles:/usr/share/nginx/html/static
     depends_on:
       - web
-
