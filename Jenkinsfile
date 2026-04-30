@@ -1,0 +1,71 @@
+pipeline {
+    agent {
+        kubernetes {
+            serviceAccount 'jenkins-admin'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ['sleep']
+    args: ['99d']
+  - name: git
+    image: alpine/git
+    command: ['sleep']
+    args: ['99d']
+"""
+        }
+    }
+
+    environment {
+        // url from terraform outputs
+        ECR_REPO = "://amazonaws.com"
+        // repo with manifests (Terraform/Charts)
+        GITOPS_REPO = "://github.com"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Build & Push to ECR') {
+            steps {
+                container('kaniko') {
+                    // Kaniko dont need docker login, his use IRSA (IAM role)
+                    sh """
+                    /kaniko/executor --context `pwd` \
+                        --dockerfile Dockerfile \
+                        --destination ${ECR_REPO}:${IMAGE_TAG} \
+                        --destination ${ECR_REPO}:latest
+                    """
+                }
+            }
+        }
+
+        stage('Update GitOps Manifests') {
+            steps {
+                container('git') {
+                    script {
+                        // using GitHub Token, created in Credentials Jenkins
+                        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+                            sh """
+                                git clone https://${GH_TOKEN}@${GITOPS_REPO} temp_infra
+                                cd temp_infra/charts/django-app
+                                
+                                # update tag in values.yaml
+                                sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" values.yaml
+                                
+                                git config user.email "jenkins@example.com"
+                                git config user.name "Jenkins CI"
+                                git add values.yaml
+                                git commit -m "Update Django image to ${IMAGE_TAG} [skip ci]"
+                                git push origin main
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
