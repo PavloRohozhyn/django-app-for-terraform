@@ -45,12 +45,12 @@ spec:
                 container('git') {
                     script {
                         // using GitHub Token, created in Credentials Jenkins
-                        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
+                       withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
                             sh """
                                 git clone https://${GH_TOKEN}@${GITOPS_REPO} temp_infra
                                 cd temp_infra/charts/django-app
                                 
-                                # update tag in values.yaml
+                                # Решта команд без змін...
                                 sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" values.yaml
                                 
                                 git config user.email "jenkins@example.com"
