@@ -44,17 +44,24 @@ spec:
             steps {
                 container('git') {
                     script {
-                        
                         withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
                             sh """
                                 git config --global user.email "jenkins@example.com"
                                 git config --global user.name "Jenkins CI"
-                                git clone https://\$GH_TOKEN@${env.GITOPS_REPO} temp_infra
+                                git clone -b lesson-8-9 https://\$GH_TOKEN@github.com/PavloRohozhyn/terraform.git temp_infra
                                 cd temp_infra
-                                sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" charts/django-app/values.yaml
-                                git add charts/django-app/values.yaml
-                                git commit -m "Update Django image to ${IMAGE_TAG} [skip ci]"
-                                git push origin main
+                                FILE_PATH="lesson-8-9/charts/django-app/values.yaml"
+                                if [ -f "\$FILE_PATH" ]; then
+                                    echo "Update tag to : ${IMAGE_TAG}"
+                                    sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" "\$FILE_PATH"
+                                    git add "\$FILE_PATH"
+                                    git commit -m "Update Django image to ${IMAGE_TAG} (Build #${BUILD_NUMBER}) [skip ci]"
+                                    git push origin lesson-8-9
+                                else
+                                    echo "error: file \$FILE_PATH not found"
+                                    find . -maxdepth 3 -not -path '*/.*'
+                                    exit 1
+                                fi
                             """
                         }
                     }
