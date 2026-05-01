@@ -4,16 +4,13 @@ services:
     container_name: application
     restart: always
     volumes:
-      # Монтуємо папку з кодом
       - ./src:/app
-      # Прокидаємо entrypoint, щоб він не зникав
       - ./entrypoint.sh:/app/entrypoint.sh
     ports:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
 
-  # Якщо у вас є nginx, залиште його, якщо ні — можна видалити цю секцію
   nginx:
     image: nginx:latest
     container_name: web-server
