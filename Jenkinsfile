@@ -19,11 +19,9 @@ spec:
         }
     }
 
-    environment {
-        // url from terraform outputs
-        ECR_REPO = "://amazonaws.com"
-        // repo with manifests (Terraform/Charts)
-        GITOPS_REPO = "://github.com"
+   environment {
+        ECR_REPO = "211125349493.dkr.ecr.us-east-1.amazonaws.com/dev-lesson-8-9-test"
+        GITOPS_REPO = "github.com/PavloRohozhyn/django-app-for-terraform.git"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
