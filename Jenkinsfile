@@ -41,29 +41,33 @@ spec:
         }
 
         stage('Update GitOps Manifests') {
-            steps {
-                container('git') {
-                    script {
-                        // using GitHub Token, created in Credentials Jenkins
-                       withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
-                            sh """
-                                git clone https://${GH_TOKEN}@${GITOPS_REPO} temp_infra
-                                cd temp_infra/charts/django-app
-                                
-                                # Решта команд без змін...
-                                sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" values.yaml
-                                
-                                git config user.email "jenkins@example.com"
-                                git config user.name "Jenkins CI"
-                                git add values.yaml
-                                git commit -m "Update Django image to ${IMAGE_TAG} [skip ci]"
-                                git push origin main
-                            """
-                        }
-                    }
+    steps {
+        container('git') {
+            script {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-token', 
+                    usernameVariable: 'GH_USER', 
+                    passwordVariable: 'GH_TOKEN'
+                )]) {
+                    sh """
+                        # Використовуємо GH_TOKEN, який тепер містить ваш GitHub PAT
+                        git clone https://${GH_TOKEN}@${env.GITOPS_REPO} temp_infra
+                        cd temp_infra/charts/django-app
+                        
+                        # Оновлення тегу
+                        sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" values.yaml
+                        
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins CI"
+                        git add values.yaml
+                        git commit -m "Update Django image to ${IMAGE_TAG} [skip ci]"
+                        git push origin main
+                    """
                 }
             }
         }
+    }
+}
     }
 }
 
