@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
-export PYTHONPATH=$PYTHONPATH:/app
-echo "Running migrations..."
-python app/manage.py migrate --noinput
-echo "Starting Gunicorn..."
-exec gunicorn --bind 0.0.0.0:8000 app.app.wsgi:application
+echo "Applying migrations..."
+python manage.py migrate --noinput
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+echo "Starting Django server..."
+exec python manage.py runserver 0.0.0.0:8000
