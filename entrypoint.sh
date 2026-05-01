@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
-echo "migration migrate ..."
+export PYTHONPATH=$PYTHONPATH:/app
+echo "Running migrations..."
 python app/manage.py migrate --noinput
-echo "run Gunicorn..."
-exec gunicorn --bind 0.0.0.0:8000 app.wsgi:application
+echo "Starting Gunicorn..."
+exec gunicorn --bind 0.0.0.0:8000 app.app.wsgi:application
