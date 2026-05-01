@@ -3,4 +3,4 @@ set -e
 echo "migration migrate ..."
 python app/manage.py migrate --noinput
 echo "run Gunicorn..."
-exec gunicorn --bind 0.0.0.0:8000 app.app.wsgi:application
+exec gunicorn --bind 0.0.0.0:8000 app.wsgi:application
