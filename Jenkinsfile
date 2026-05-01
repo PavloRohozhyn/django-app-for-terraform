@@ -44,15 +44,12 @@ spec:
             steps {
                 container('git') {
                     script {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'github-token', 
-                            usernameVariable: 'GH_USER', 
-                            passwordVariable: 'GH_TOKEN'
-                        )]) {
+                        
+                        withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
                             sh """
                                 git config --global user.email "jenkins@example.com"
                                 git config --global user.name "Jenkins CI"
-                                git clone https://${GH_TOKEN}@${env.GITOPS_REPO} temp_infra
+                                git clone https://\$GH_TOKEN@${env.GITOPS_REPO} temp_infra
                                 cd temp_infra
                                 sed -i "s/tag: .*/tag: \\"${IMAGE_TAG}\\"/" charts/django-app/values.yaml
                                 git add charts/django-app/values.yaml
